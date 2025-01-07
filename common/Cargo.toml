@@ -1,0 +1,8 @@
+[package]
+name = "common"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1.0.217", features = ["derive"], default-features = false }
+serde-json-core = "0.6.0"

@@ -1,0 +1,7 @@
+[workspace]
+resolver = "2"
+members = [ "common","minijinja"]
+
+[profile.release]
+lto = "fat"
+strip = true

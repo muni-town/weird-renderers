@@ -1,0 +1,19 @@
+[package]
+name = "weird_renderer_minijinja"
+version = "0.1.0"
+edition = "2021"
+# version.workspace = true
+# authors.workspace = true
+# categories.workspace = true
+# documentation.workspace = true
+# edition.workspace = true
+# keywords.workspace = true
+# license.workspace = true
+# repository.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+common = { path = "../common" }
+minijinja = { version = "2.5.0", default-features = false }

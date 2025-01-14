@@ -3,7 +3,7 @@ use core::alloc::Layout;
 use std::{panic::PanicHookInfo, sync::OnceLock};
 
 use serde::{Deserialize, Serialize};
-pub use serde_json_core;
+pub use serde_json;
 
 #[derive(Serialize, Deserialize)]
 pub struct ProfileData {
@@ -116,12 +116,8 @@ macro_rules! render_function {
             unsafe {
                 let profile_data_json_bytes =
                     ::core::slice::from_raw_parts_mut(profile_data_json_ptr, profile_data_json_len);
-                let (profile_data, _): (ProfileData, _) =
-                    $crate::serde_json_core::from_slice_escaped(
-                        profile_data_json_bytes,
-                        &mut [0; 128],
-                    )
-                    .unwrap();
+                let profile_data: ProfileData =
+                    $crate::serde_json::from_slice(profile_data_json_bytes).unwrap();
                 let theme = ::core::slice::from_raw_parts_mut(theme_data, theme_data_len);
                 let mut result: String = $function(profile_data, theme);
 

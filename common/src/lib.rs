@@ -17,7 +17,7 @@ pub struct ProfileData {
     #[serde(default)]
     pub bio: Option<String>,
     #[serde(default)]
-    pub social_links: Vec<LinkInfo>,
+    pub social_links: Vec<SocialLinkInfo>,
     #[serde(default)]
     pub links: Vec<LinkInfo>,
     #[serde(default)]
@@ -27,6 +27,19 @@ pub struct ProfileData {
 #[derive(Serialize, Deserialize)]
 pub struct InstanceInfo {
     pub url: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct SocialLinkInfo {
+    pub url: String,
+    #[serde(default)]
+    pub label: Option<String>,
+    #[serde(default)]
+    pub platform_name: Option<String>,
+    #[serde(default)]
+    pub icon: Option<String>,
+    #[serde(default)]
+    pub icon_name: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]

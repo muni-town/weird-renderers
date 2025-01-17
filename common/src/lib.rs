@@ -17,6 +17,8 @@ pub struct ProfileData {
     #[serde(default)]
     pub bio: Option<String>,
     #[serde(default)]
+    pub social_links: Vec<LinkInfo>,
+    #[serde(default)]
     pub links: Vec<LinkInfo>,
     #[serde(default)]
     pub pages: Vec<PageInfo>,

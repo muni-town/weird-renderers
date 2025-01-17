@@ -4,7 +4,8 @@ use minijinja::*;
 render_function!(render);
 
 fn render_markdown(m: String) -> String {
-    markdown::to_html(&m)
+    markdown::to_html_with_options(&m, &markdown::Options::gfm())
+        .expect("Couldn't render markdown.")
 }
 
 fn render(profile_data: ProfileData, theme: &mut [u8]) -> String {

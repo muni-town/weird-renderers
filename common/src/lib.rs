@@ -6,8 +6,32 @@ use serde::{Deserialize, Serialize};
 pub use serde_json;
 
 #[derive(Serialize, Deserialize)]
-pub struct ProfileData {
+pub struct PageData {
+    pub profile: ProfileData,
+    #[serde(default)]
+    pub title: String,
+    #[serde(default)]
+    pub slug: String,
+    #[serde(default)]
+    pub markdown: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct PageRenderInput {
     pub instance_info: InstanceInfo,
+    #[serde(flatten)]
+    pub page: PageData,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ProfileRenderInput {
+    pub instance_info: InstanceInfo,
+    #[serde(flatten)]
+    pub profile: ProfileData,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ProfileData {
     #[serde(default)]
     pub handle: String,
     #[serde(default)]
@@ -116,11 +140,11 @@ unsafe extern "C" fn drop_output() {
 /// render_function!(my_render_function);
 /// ```
 #[macro_export]
-macro_rules! render_function {
-    ($function:ident) => {
+macro_rules! render_functions {
+    ($render_profile:ident, $render_page:ident) => {
         #[no_mangle]
         #[allow(improper_ctypes_definitions)] // Returning a tuple is valid for WASM multi-return
-        extern "C" fn wasm_render(
+        extern "C" fn wasm_render_profile(
             profile_data_json_ptr: *mut u8,
             profile_data_json_len: usize,
             theme_data: *mut u8,
@@ -131,10 +155,37 @@ macro_rules! render_function {
             unsafe {
                 let profile_data_json_bytes =
                     ::core::slice::from_raw_parts_mut(profile_data_json_ptr, profile_data_json_len);
-                let profile_data: ProfileData =
+                let profile_data: ProfileRenderInput =
                     $crate::serde_json::from_slice(profile_data_json_bytes).unwrap();
                 let theme = ::core::slice::from_raw_parts_mut(theme_data, theme_data_len);
-                let mut result: String = $function(profile_data, theme);
+                let mut result: String = $render_profile(profile_data, theme);
+
+                let mut out = Box::new(result);
+                OUTPUT = (out.as_mut_ptr(), out.len());
+                OUTPUT_PTR = Box::into_raw(out) as *mut u8;
+                DROP_OUTPUT = || {
+                    std::ptr::drop_in_place(OUTPUT_PTR as *mut String);
+                }
+            }
+        }
+
+        #[no_mangle]
+        #[allow(improper_ctypes_definitions)] // Returning a tuple is valid for WASM multi-return
+        extern "C" fn wasm_render_page(
+            profile_data_json_ptr: *mut u8,
+            profile_data_json_len: usize,
+            theme_data: *mut u8,
+            theme_data_len: usize,
+        ) {
+            $crate::set_panic_hook_once();
+
+            unsafe {
+                let profile_data_json_bytes =
+                    ::core::slice::from_raw_parts_mut(profile_data_json_ptr, profile_data_json_len);
+                let page_data: PageRenderInput =
+                    $crate::serde_json::from_slice(profile_data_json_bytes).unwrap();
+                let theme = ::core::slice::from_raw_parts_mut(theme_data, theme_data_len);
+                let mut result: String = $render_page(page_data, theme);
 
                 let mut out = Box::new(result);
                 OUTPUT = (out.as_mut_ptr(), out.len());

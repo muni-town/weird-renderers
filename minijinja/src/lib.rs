@@ -1,7 +1,27 @@
 use common::*;
 use minijinja::*;
 
-render_function!(render);
+render_functions!(render_profile, render_page);
+
+fn render_profile(profile_data: ProfileRenderInput, theme: &mut [u8]) -> String {
+    let mut env = Environment::new();
+    env.add_filter("markdown", render_markdown);
+    env.add_filter("markdown_text", render_markdown_text);
+    let template = core::str::from_utf8(theme).unwrap();
+    env.add_template("index", template).unwrap();
+    let tpl = env.get_template("index").unwrap();
+    tpl.render(profile_data).unwrap()
+}
+
+fn render_page(profile_data: PageRenderInput, theme: &mut [u8]) -> String {
+    let mut env = Environment::new();
+    env.add_filter("markdown", render_markdown);
+    env.add_filter("markdown_text", render_markdown_text);
+    let template = core::str::from_utf8(theme).unwrap();
+    env.add_template("index", template).unwrap();
+    let tpl = env.get_template("index").unwrap();
+    tpl.render(profile_data).unwrap()
+}
 
 fn render_markdown(m: String) -> String {
     markdown::to_html_with_options(&m, &markdown::Options::gfm())
@@ -88,14 +108,4 @@ fn accumulate_plaintext(out: &mut String, node: markdown::mdast::Node) {
             out.push_str("\n\n");
         }
     }
-}
-
-fn render(profile_data: ProfileData, theme: &mut [u8]) -> String {
-    let mut env = Environment::new();
-    env.add_filter("markdown", render_markdown);
-    env.add_filter("markdown_text", render_markdown_text);
-    let template = core::str::from_utf8(theme).unwrap();
-    env.add_template("index", template).unwrap();
-    let tpl = env.get_template("index").unwrap();
-    tpl.render(profile_data).unwrap()
 }
